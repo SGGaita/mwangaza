@@ -1,7 +1,7 @@
 # 🌟 Mwangaza - Digital Civic Platform for Accountability & Justice in Kenya
 
 ![Mwangaza Logo](https://img.shields.io/badge/Mwangaza-Digital%20Civic%20Platform-gold?style=for-the-badge&logo=star)
-![Status](https://img.shields.io/badge/Status-BETA-orange?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-LIVE-green?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=nextdotjs)
 ![Material UI](https://img.shields.io/badge/Material--UI-5.15-blue?style=for-the-badge&logo=mui)
@@ -329,7 +329,7 @@ docker run -p 3000:3000 mwangaza
 
 ### Get Help
 - 📧 Email: support@mwangaza.ke
-- �� Discord: [Join our community](https://discord.gg/mwangaza)
+- 💬 Discord: [Join our community](https://discord.gg/mwangaza)
 - 🐛 Issues: [GitHub Issues](https://github.com/your-org/mwangaza/issues)
 - 📖 Documentation: [docs.mwangaza.ke](https://docs.mwangaza.ke)
 
