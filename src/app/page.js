@@ -25,6 +25,10 @@ import {
   Avatar,
   Switch,
   FormControlLabel,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
 } from '@mui/material';
 import {
   Security,
@@ -80,90 +84,176 @@ export default function HomePage() {
   const [showLiveMap, setShowLiveMap] = useState(true);
   const [incidentData, setIncidentData] = useState([]);
   const [hotspots, setHotspots] = useState([]);
+  const [selectedCounty, setSelectedCounty] = useState('all');
 
-  // Mock incident data for the live map
-  const generateIncidentData = () => {
-    const locations = [
-      { name: 'Nairobi CBD', lat: -1.2864, lng: 36.8172 },
-      { name: 'Kisumu', lat: -0.1022, lng: 34.7617 },
-      { name: 'Mombasa', lat: -4.0435, lng: 39.6682 },
-      { name: 'Nakuru', lat: -0.3031, lng: 36.0800 },
-      { name: 'Eldoret', lat: 0.5143, lng: 35.2698 },
-      { name: 'Thika', lat: -1.0332, lng: 37.0692 },
-      { name: 'Machakos', lat: -1.5177, lng: 37.2634 },
-      { name: 'Meru', lat: 0.0496, lng: 37.6556 },
-    ];
+  // Kenya Counties with coordinates and population data
+  const kenyaCounties = [
+    { name: 'Nairobi', lat: -1.2921, lng: 36.8219, population: 4397073, region: 'Central' },
+    { name: 'Mombasa', lat: -4.0435, lng: 39.6682, population: 1208333, region: 'Coast' },
+    { name: 'Kisumu', lat: -0.1022, lng: 34.7617, population: 1155574, region: 'Nyanza' },
+    { name: 'Nakuru', lat: -0.3031, lng: 36.0800, population: 2162202, region: 'Rift Valley' },
+    { name: 'Eldoret', lat: 0.5143, lng: 35.2698, population: 1163186, region: 'Rift Valley' },
+    { name: 'Kiambu', lat: -1.1719, lng: 36.8356, population: 2417735, region: 'Central' },
+    { name: 'Machakos', lat: -1.5177, lng: 37.2634, population: 1421932, region: 'Eastern' },
+    { name: 'Meru', lat: 0.0496, lng: 37.6556, population: 1545714, region: 'Eastern' },
+    { name: 'Kakamega', lat: 0.2827, lng: 34.7519, population: 1867579, region: 'Western' },
+    { name: 'Kilifi', lat: -3.5053, lng: 39.8499, population: 1453787, region: 'Coast' },
+    { name: 'Bungoma', lat: 0.5635, lng: 34.5606, population: 1670570, region: 'Western' },
+    { name: 'Turkana', lat: 3.1167, lng: 35.5667, population: 926976, region: 'Rift Valley' },
+    { name: 'Garissa', lat: -0.4536, lng: 39.6401, population: 841353, region: 'North Eastern' },
+    { name: 'Mandera', lat: 3.9366, lng: 41.8569, population: 1025756, region: 'North Eastern' },
+    { name: 'Wajir', lat: 1.7471, lng: 40.0629, population: 781263, region: 'North Eastern' },
+    { name: 'Marsabit', lat: 2.3284, lng: 37.9899, population: 459785, region: 'Northern' },
+    { name: 'Isiolo', lat: 0.3556, lng: 37.5833, population: 268002, region: 'Eastern' },
+    { name: 'Samburu', lat: 1.1667, lng: 36.8000, population: 310327, region: 'Rift Valley' },
+    { name: 'Trans Nzoia', lat: 1.0217, lng: 35.0003, population: 990341, region: 'Rift Valley' },
+    { name: 'West Pokot', lat: 1.4167, lng: 35.1167, population: 621241, region: 'Rift Valley' },
+    { name: 'Baringo', lat: 0.4683, lng: 35.9667, population: 666763, region: 'Rift Valley' },
+    { name: 'Laikipia', lat: 0.0333, lng: 36.7833, population: 518560, region: 'Central' },
+    { name: 'Nyandarua', lat: -0.3667, lng: 36.4167, population: 638289, region: 'Central' },
+    { name: 'Nyeri', lat: -0.4167, lng: 36.9500, population: 759164, region: 'Central' },
+    { name: 'Kirinyaga', lat: -0.6667, lng: 37.3000, population: 610411, region: 'Central' },
+    { name: 'Murang\'a', lat: -0.7167, lng: 37.1500, population: 1056640, region: 'Central' },
+    { name: 'Embu', lat: -0.5167, lng: 37.4500, population: 608599, region: 'Eastern' },
+    { name: 'Tharaka Nithi', lat: -0.1667, lng: 37.9167, population: 393177, region: 'Eastern' },
+    { name: 'Kitui', lat: -1.3667, lng: 38.0167, population: 1136187, region: 'Eastern' },
+    { name: 'Makueni', lat: -1.8039, lng: 37.6244, population: 987653, region: 'Eastern' },
+    { name: 'Kajiado', lat: -1.8500, lng: 36.7833, population: 1117840, region: 'Rift Valley' },
+    { name: 'Kericho', lat: -0.3667, lng: 35.2833, population: 901777, region: 'Rift Valley' },
+    { name: 'Bomet', lat: -0.7833, lng: 35.3417, population: 875689, region: 'Rift Valley' },
+    { name: 'Narok', lat: -1.0833, lng: 35.8667, population: 1157873, region: 'Rift Valley' },
+    { name: 'Nandi', lat: 0.1833, lng: 35.1000, population: 885711, region: 'Rift Valley' },
+    { name: 'Elgeyo Marakwet', lat: 0.8833, lng: 35.4500, population: 454480, region: 'Rift Valley' },
+    { name: 'Busia', lat: 0.4667, lng: 34.1167, population: 893681, region: 'Western' },
+    { name: 'Vihiga', lat: 0.0833, lng: 34.7333, population: 590013, region: 'Western' },
+    { name: 'Siaya', lat: 0.0833, lng: 34.2833, population: 993183, region: 'Nyanza' },
+    { name: 'Kisii', lat: -0.6833, lng: 34.7667, population: 1266860, region: 'Nyanza' },
+    { name: 'Nyamira', lat: -0.5667, lng: 34.9333, population: 605576, region: 'Nyanza' },
+    { name: 'Homa Bay', lat: -0.5167, lng: 34.4667, population: 1131950, region: 'Nyanza' },
+    { name: 'Migori', lat: -1.0634, lng: 34.4731, population: 1116436, region: 'Nyanza' },
+    { name: 'Kwale', lat: -4.1769, lng: 39.4503, population: 866820, region: 'Coast' },
+    { name: 'Kilifi', lat: -3.5053, lng: 39.8499, population: 1453787, region: 'Coast' },
+    { name: 'Tana River', lat: -1.3000, lng: 40.1167, population: 315943, region: 'Coast' },
+    { name: 'Lamu', lat: -2.2717, lng: 40.9020, population: 143920, region: 'Coast' },
+    { name: 'Taita Taveta', lat: -3.3167, lng: 38.3667, population: 340671, region: 'Coast' }
+  ];
 
+  // County-based incident data generation
+  const generateCountyIncidentData = () => {
     const incidentTypes = [
-      { type: 'police_brutality', severity: 'high', color: '#d32f2f' },
-      { type: 'enforced_disappearance', severity: 'critical', color: '#b71c1c' },
-      { type: 'harassment', severity: 'medium', color: '#f57c00' },
-      { type: 'arbitrary_arrest', severity: 'high', color: '#e53935' },
-      { type: 'protest_disruption', severity: 'medium', color: '#ff9800' },
+      { type: 'police_brutality', severity: 'high', color: '#d32f2f', urbanBias: 1.5 },
+      { type: 'enforced_disappearance', severity: 'critical', color: '#b71c1c', urbanBias: 1.2 },
+      { type: 'harassment', severity: 'medium', color: '#f57c00', urbanBias: 1.0 },
+      { type: 'arbitrary_arrest', severity: 'high', color: '#e53935', urbanBias: 1.3 },
+      { type: 'protest_disruption', severity: 'medium', color: '#ff9800', urbanBias: 1.8 },
+      { type: 'extrajudicial_killing', severity: 'critical', color: '#c62828', urbanBias: 0.8 },
+      { type: 'torture', severity: 'high', color: '#d32f2f', urbanBias: 0.9 },
+      { type: 'illegal_detention', severity: 'high', color: '#e53935', urbanBias: 1.1 },
     ];
 
-    return locations.map((location, index) => {
-      const incident = incidentTypes[Math.floor(Math.random() * incidentTypes.length)];
-      return {
-        id: `INC${Date.now()}-${index}`,
-        name: `${incident.type.replace('_', ' ').toUpperCase()} - ${location.name}`,
-        location: location.name,
-        coordinates: { 
-          lat: location.lat + (Math.random() - 0.5) * 0.1, 
-          lng: location.lng + (Math.random() - 0.5) * 0.1 
-        },
-        type: 'incident',
-        category: incident.type,
-        severity: incident.severity,
-        timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
-        description: `Active ${incident.type.replace('_', ' ')} incident reported in ${location.name} area`,
-        verified: Math.random() > 0.3,
-        reporterCount: Math.floor(Math.random() * 15) + 1,
-        color: incident.color,
+    // Generate incidents based on county population and risk factors
+    const incidents = [];
+    
+    kenyaCounties.forEach((county, countyIndex) => {
+      // Calculate incident probability based on population and region
+      const populationFactor = Math.log(county.population) / 15; // Logarithmic scale
+      const regionRiskFactors = {
+        'Central': 1.2, // Higher due to political activity
+        'Nyanza': 1.3, // Higher due to political tensions
+        'Coast': 1.1, // Moderate due to tourism and trade
+        'Rift Valley': 1.4, // Higher due to historical conflicts
+        'Western': 1.0, // Baseline
+        'Eastern': 0.9, // Lower but still significant
+        'North Eastern': 1.5, // Higher due to security issues
+        'Northern': 1.3, // Higher due to marginalization
       };
+      
+      const regionFactor = regionRiskFactors[county.region] || 1.0;
+      const incidentProbability = populationFactor * regionFactor * 0.3;
+      
+      // Generate 1-3 incidents per county based on probability
+      const incidentCount = Math.floor(Math.random() * 3) + 1;
+      
+      for (let i = 0; i < incidentCount; i++) {
+        if (Math.random() < incidentProbability) {
+          const incident = incidentTypes[Math.floor(Math.random() * incidentTypes.length)];
+          
+          // Adjust coordinates within county boundaries (approximate)
+          const latVariation = (Math.random() - 0.5) * 0.2; // ±0.1 degrees
+          const lngVariation = (Math.random() - 0.5) * 0.2;
+          
+          incidents.push({
+            id: `INC${Date.now()}-${countyIndex}-${i}`,
+            name: `${incident.type.replace(/_/g, ' ').toUpperCase()} - ${county.name} County`,
+            location: county.name,
+            county: county.name,
+            region: county.region,
+            coordinates: { 
+              lat: county.lat + latVariation, 
+              lng: county.lng + lngVariation 
+            },
+            type: 'incident',
+            category: incident.type,
+            severity: incident.severity,
+            timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000), // Last 7 days
+            description: `Active ${incident.type.replace(/_/g, ' ')} incident reported in ${county.name} County, ${county.region} region`,
+            verified: Math.random() > 0.25, // 75% verification rate
+            reporterCount: Math.floor(Math.random() * 20) + 1,
+            color: incident.color,
+            population: county.population,
+          });
+        }
+      }
     });
+
+    return incidents;
   };
 
-  // Generate hotspot data
-  const generateHotspots = () => {
-    return [
-      {
-        id: 'HS001',
-        name: 'Nairobi Central',
-        coordinates: { lat: -1.2921, lng: 36.8219 },
-        riskLevel: 'high',
-        incidentCount: 23,
-        recentIncidents: 5,
-        description: 'High concentration of human rights violations',
-        radius: 15000, // in meters
-      },
-      {
-        id: 'HS002',
-        name: 'Kisumu Town',
-        coordinates: { lat: -0.1022, lng: 34.7617 },
-        riskLevel: 'medium',
-        incidentCount: 12,
-        recentIncidents: 3,
-        description: 'Moderate risk area with recent incidents',
-        radius: 10000,
-      },
-      {
-        id: 'HS003',
-        name: 'Mathare Slums',
-        coordinates: { lat: -1.2647, lng: 36.8611 },
-        riskLevel: 'critical',
-        incidentCount: 31,
-        recentIncidents: 8,
-        description: 'Critical risk zone - heightened alert',
-        radius: 8000,
-      },
+  // Generate county-based hotspots
+  const generateCountyHotspots = () => {
+    const highRiskCounties = [
+      { county: 'Nairobi', reason: 'High population density and political activity', riskLevel: 'critical' },
+      { county: 'Mombasa', reason: 'Port security and radicalization concerns', riskLevel: 'high' },
+      { county: 'Kisumu', reason: 'Political opposition stronghold', riskLevel: 'high' },
+      { county: 'Turkana', reason: 'Resource conflicts and marginalization', riskLevel: 'critical' },
+      { county: 'Garissa', reason: 'Security threats and extremism', riskLevel: 'critical' },
+      { county: 'Mandera', reason: 'Border insecurity and terrorism', riskLevel: 'critical' },
+      { county: 'Nakuru', reason: 'Inter-ethnic tensions', riskLevel: 'medium' },
+      { county: 'Kakamega', reason: 'Land disputes and political tensions', riskLevel: 'medium' },
+      { county: 'Bungoma', reason: 'Cross-border crime', riskLevel: 'medium' },
+      { county: 'Kilifi', reason: 'Radicalization and coastal insecurity', riskLevel: 'high' },
     ];
+
+    return highRiskCounties.map((hotspot, index) => {
+      const county = kenyaCounties.find(c => c.name === hotspot.county);
+      if (!county) return null;
+
+      const riskScores = { critical: 4, high: 3, medium: 2, low: 1 };
+      const riskScore = riskScores[hotspot.riskLevel];
+      
+      return {
+        id: `HS${String(index + 1).padStart(3, '0')}`,
+        name: `${county.name} County`,
+        county: county.name,
+        region: county.region,
+        coordinates: { 
+          lat: county.lat + (Math.random() - 0.5) * 0.05, 
+          lng: county.lng + (Math.random() - 0.5) * 0.05 
+        },
+        riskLevel: hotspot.riskLevel,
+        incidentCount: Math.floor(Math.random() * riskScore * 10) + riskScore * 5,
+        recentIncidents: Math.floor(Math.random() * riskScore * 3) + 1,
+        description: hotspot.reason,
+        radius: riskScore * 8000, // Radius based on risk level
+        population: county.population,
+      };
+    }).filter(Boolean);
   };
 
   // Initialize incident data
   useEffect(() => {
-    setIncidentData(generateIncidentData());
-    setHotspots(generateHotspots());
+    setIncidentData(generateCountyIncidentData());
+    setHotspots(generateCountyHotspots());
   }, []);
 
   // Simulate real-time updates
@@ -179,7 +269,7 @@ export default function HomePage() {
       
       // Update incident data occasionally
       if (Math.random() > 0.8) {
-        setIncidentData(generateIncidentData());
+        setIncidentData(generateCountyIncidentData());
       }
       
       // Simulate new activity
@@ -748,8 +838,68 @@ export default function HomePage() {
                 </Typography>
               </Alert>
 
-              {/* Map Controls */}
-              <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+              {/* County Filter and Controls */}
+              <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* County Filter Dropdown */}
+                <FormControl sx={{ minWidth: 200 }}>
+                  <InputLabel id="county-filter-label">Filter by County</InputLabel>
+                  <Select
+                    labelId="county-filter-label"
+                    value={selectedCounty}
+                    label="Filter by County"
+                    onChange={(e) => setSelectedCounty(e.target.value)}
+                    size="small"
+                  >
+                    <MenuItem value="all">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Map sx={{ fontSize: 16 }} />
+                        All Counties (47)
+                      </Box>
+                    </MenuItem>
+                    <Divider />
+                    {['Central', 'Coast', 'Eastern', 'North Eastern', 'Northern', 'Nyanza', 'Rift Valley', 'Western'].map(region => (
+                      <Box key={region}>
+                        <MenuItem disabled sx={{ fontWeight: 600, color: 'primary.main' }}>
+                          {region} Region
+                        </MenuItem>
+                        {kenyaCounties
+                          .filter(county => county.region === region)
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map(county => {
+                            const countyIncidents = incidentData.filter(inc => inc.county === county.name);
+                            const countyHotspots = hotspots.filter(hs => hs.county === county.name);
+                            return (
+                              <MenuItem key={county.name} value={county.name} sx={{ pl: 3 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                                  <Typography variant="body2">{county.name}</Typography>
+                                  <Box sx={{ display: 'flex', gap: 1 }}>
+                                    {countyIncidents.length > 0 && (
+                                      <Chip 
+                                        label={countyIncidents.length} 
+                                        size="small" 
+                                        color="error" 
+                                        sx={{ height: 16, fontSize: '0.6rem' }}
+                                      />
+                                    )}
+                                    {countyHotspots.length > 0 && (
+                                      <Chip 
+                                        label="H" 
+                                        size="small" 
+                                        color="warning" 
+                                        sx={{ height: 16, fontSize: '0.6rem', minWidth: 'auto', width: 16 }}
+                                      />
+                                    )}
+                                  </Box>
+                                </Box>
+                              </MenuItem>
+                            );
+                          })}
+                      </Box>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* Action Buttons */}
                 <Button
                   variant="outlined"
                   startIcon={<Report />}
@@ -782,19 +932,116 @@ export default function HomePage() {
                 >
                   View Analytics
                 </Button>
+                
+                {/* Filter Reset */}
+                {selectedCounty !== 'all' && (
+                  <Button
+                    variant="text"
+                    onClick={() => setSelectedCounty('all')}
+                    size="small"
+                    sx={{ ml: 'auto' }}
+                  >
+                    Clear Filter
+                  </Button>
+                )}
               </Box>
+
+              {/* County Information Panel */}
+              {selectedCounty !== 'all' && (
+                <Paper elevation={2} sx={{ p: 2, mb: 3, bgcolor: 'grey.50' }}>
+                  {(() => {
+                    const county = kenyaCounties.find(c => c.name === selectedCounty);
+                    const countyIncidents = incidentData.filter(inc => inc.county === selectedCounty);
+                    const countyHotspots = hotspots.filter(hs => hs.county === selectedCounty);
+                    const criticalIncidents = countyIncidents.filter(inc => inc.severity === 'critical');
+                    
+                    if (!county) return null;
+                    
+                    return (
+                      <Box>
+                        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                          {county.name} County - {county.region} Region
+                        </Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6} sm={3}>
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h5" fontWeight={700} color="primary.main">
+                                {county.population.toLocaleString()}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Population
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h5" fontWeight={700} color="error.main">
+                                {countyIncidents.length}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Active Incidents
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h5" fontWeight={700} color="warning.main">
+                                {countyHotspots.length}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Risk Hotspots
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h5" fontWeight={700} color="error.dark">
+                                {criticalIncidents.length}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Critical Cases
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    );
+                  })()}
+                </Paper>
+              )}
 
               {/* The Map Component */}
               <Box sx={{ height: 500, borderRadius: 2, overflow: 'hidden', mb: 3 }}>
                 <GoogleMap 
-                  locations={[...incidentData, ...hotspots.map(h => ({
-                    ...h,
-                    type: 'hotspot',
-                    name: `${h.name} (${h.riskLevel.toUpperCase()} RISK)`,
-                    description: `${h.description} - ${h.incidentCount} total incidents, ${h.recentIncidents} recent`,
-                  }))]}
-                  center={{ lat: -1.2921, lng: 36.8219 }} // Kenya center
-                  zoom={7}
+                  locations={(() => {
+                    // Filter data based on selected county
+                    const filteredIncidents = selectedCounty === 'all' 
+                      ? incidentData 
+                      : incidentData.filter(inc => inc.county === selectedCounty);
+                    
+                    const filteredHotspots = selectedCounty === 'all' 
+                      ? hotspots 
+                      : hotspots.filter(hs => hs.county === selectedCounty);
+                    
+                    return [
+                      ...filteredIncidents, 
+                      ...filteredHotspots.map(h => ({
+                        ...h,
+                        type: 'hotspot',
+                        name: `${h.name} (${h.riskLevel.toUpperCase()} RISK)`,
+                        description: `${h.description} - ${h.incidentCount} total incidents, ${h.recentIncidents} recent`,
+                      }))
+                    ];
+                  })()}
+                  center={(() => {
+                    // Center map on selected county or Kenya center
+                    if (selectedCounty === 'all') {
+                      return { lat: -1.2921, lng: 36.8219 }; // Kenya center
+                    }
+                    const county = kenyaCounties.find(c => c.name === selectedCounty);
+                    return county ? { lat: county.lat, lng: county.lng } : { lat: -1.2921, lng: 36.8219 };
+                  })()} 
+                  zoom={selectedCounty === 'all' ? 6 : 10}
                   height={500}
                   showControls={true}
                   showIncidents={true}
@@ -807,13 +1054,34 @@ export default function HomePage() {
               {/* Recent Incidents List */}
               <Box>
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-                  Recent Critical Incidents
+                  {selectedCounty === 'all' ? 'Recent Critical Incidents' : `Recent Critical Incidents in ${selectedCounty} County`}
                 </Typography>
                 <Grid container spacing={2}>
-                  {incidentData
-                    .filter(incident => incident.severity === 'critical' || incident.severity === 'high')
-                    .slice(0, 3)
-                    .map((incident, index) => (
+                  {(() => {
+                    // Filter incidents based on selected county
+                    const filteredIncidents = selectedCounty === 'all' 
+                      ? incidentData 
+                      : incidentData.filter(inc => inc.county === selectedCounty);
+                    
+                    const criticalIncidents = filteredIncidents
+                      .filter(incident => incident.severity === 'critical' || incident.severity === 'high')
+                      .slice(0, 3);
+                    
+                    if (criticalIncidents.length === 0) {
+                      return (
+                        <Grid item xs={12}>
+                          <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'grey.50' }}>
+                            <Typography variant="body1" color="text.secondary">
+                              {selectedCounty === 'all' 
+                                ? 'No critical incidents found.' 
+                                : `No critical incidents found in ${selectedCounty} County.`}
+                            </Typography>
+                          </Paper>
+                        </Grid>
+                      );
+                    }
+                    
+                    return criticalIncidents.map((incident, index) => (
                       <Grid item xs={12} md={4} key={incident.id}>
                         <Card sx={{ height: '100%' }}>
                           <CardContent sx={{ p: 2 }}>
@@ -830,16 +1098,22 @@ export default function HomePage() {
                                   size="small"
                                 />
                               )}
+                              <Chip 
+                                label={incident.region}
+                                color="primary"
+                                variant="outlined"
+                                size="small"
+                              />
                             </Box>
                             
                             <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                              {incident.category.replace('_', ' ').toUpperCase()}
+                              {incident.category.replace(/_/g, ' ').toUpperCase()}
                             </Typography>
                             
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
                               <LocationOn sx={{ fontSize: 16, color: 'text.secondary' }} />
                               <Typography variant="body2" color="text.secondary">
-                                {incident.location}
+                                {incident.location} County
                               </Typography>
                             </Box>
                             
@@ -866,21 +1140,33 @@ export default function HomePage() {
                           </CardActions>
                         </Card>
                       </Grid>
-                    ))}
+                    ));
+                  })()}
                 </Grid>
                 
-                {incidentData.filter(i => i.severity === 'critical' || i.severity === 'high').length > 3 && (
-                  <Box sx={{ textAlign: 'center', mt: 2 }}>
-                    <Button 
-                      variant="outlined" 
-                      component={Link} 
-                      href="/tracker"
-                      startIcon={<Assessment />}
-                    >
-                      View All {incidentData.filter(i => i.severity === 'critical' || i.severity === 'high').length} Critical Incidents
-                    </Button>
-                  </Box>
-                )}
+                {(() => {
+                  const filteredIncidents = selectedCounty === 'all' 
+                    ? incidentData 
+                    : incidentData.filter(inc => inc.county === selectedCounty);
+                  
+                  const criticalCount = filteredIncidents.filter(i => i.severity === 'critical' || i.severity === 'high').length;
+                  
+                  if (criticalCount > 3) {
+                    return (
+                      <Box sx={{ textAlign: 'center', mt: 2 }}>
+                        <Button 
+                          variant="outlined" 
+                          component={Link} 
+                          href="/tracker"
+                          startIcon={<Assessment />}
+                        >
+                          View All {criticalCount} Critical Incidents {selectedCounty !== 'all' ? `in ${selectedCounty}` : ''}
+                        </Button>
+                      </Box>
+                    );
+                  }
+                  return null;
+                })()}
               </Box>
             </Box>
           </Paper>
